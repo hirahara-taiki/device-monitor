@@ -3,13 +3,13 @@
 ## install
 
 ```bash
-pip install device_monitor-0.1.0-py3-none-any.whl
+pip install device_monitor-0.1.1-py3-none-any.whl
 ```
 
 ## usage
 see: `device-monitor --help`
 
-**example**
+**example: save log**
 ```bash
 device-monitor --interval 1.0 --path ./path/to/my/log.log --period 3600 --backup 24
 
@@ -22,3 +22,10 @@ QUIT: Ctrl + C
 1667325045.5114186,8502960128,6821879808,1681080320,1681080320,8,64.7,58.5,76.2,68.2,1.6,1.6,0.0,1.6,1,"C:\",254802915328,191184203776,63618711552
 ==== QUIT ====
 ```
+
+**example: display log**
+```bash
+device-monitor-serve ./path/to/my/log.log --port 5050
+```
+![image1](./image/IMG_3696.png)
+![image1](./image/IMG_3697.png)

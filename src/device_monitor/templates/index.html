@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>device-monitor</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script>
+      const charts = {};
+      const options = {
+        animation: false,
+        parsing: false,
+
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        },
+        plugins: {
+          decimation: {
+            enabled: false,
+            algorithm: 'min-max',
+          },
+          legend: {
+            display: false,
+          }
+        },
+        scales: {
+          x: {
+            type: 'time',
+            ticks: {
+              source: 'auto',
+              maxRotation: 0,
+              autoSkip: true,
+            }
+          },
+          y: {
+            min: 0,
+            max: 100,
+          }
+        }
+      };
+
+      function getdata() {
+        const duration = Math.max(10, parseInt(document.getElementById("duration").value));
+        const data = axios.get("http://{{ip}}:{{port}}/data?duration=" + duration)
+        .then((data) => {
+          const timestamp = data.data.timestamp;
+          const memory = data.data.memory;
+          const cpus = data.data.cpus;
+          const disks = data.data.disks;
+
+          // memory
+          {
+            if ("memory" in charts) {
+              charts["memory"].destroy();
+            }
+            const ctx = document.getElementById("memory-chart");
+            const points = [];
+            for (let i=0; i<timestamp.length; ++i) {
+              points.push({x: timestamp[i] * 1000, y: memory[i]})
+            }
+            charts["memory"] = new Chart(ctx, {
+              type: "line",
+              data: {datasets: [{
+                borderColor: "#ff0000",
+                borderWidth: 1,
+                data: points,
+                label: 'utilization rate',
+                radius: 0,
+              }]},
+              options,
+            });
+          }
+
+          // cpus
+          for (let i = 0; i < cpus.length; ++i) {
+            const key = "cpu:" + (i+1);
+            const id = key + "-chart";
+            if (key in charts) {
+              charts[key].destroy();
+            } else {
+              const container = document.getElementById("cpus-container");
+              const h2 = document.createElement("h2");
+              h2.textContent = key;
+              container.appendChild(h2);
+              const canvas = document.createElement("canvas");
+              canvas.id = id;
+              container.appendChild(canvas);
+            }
+            const ctx = document.getElementById(id);
+            const points = [];
+            for (let j=0; j<timestamp.length; ++j) {
+              points.push({x: timestamp[j] * 1000, y: cpus[i][j]});
+            }
+            charts[key] = new Chart(ctx, {
+              type: "line",
+              data: {datasets: [{
+                borderColor: "#ff0000",
+                borderWidth: 1,
+                data: points,
+                label: 'utilization rate',
+                radius: 0,
+              }]},
+              options,
+            });
+          }
+
+          // disks
+          for (const [key, value] of Object.entries(disks)) {
+            const id = key + "-chart";
+            if (key in charts) {
+              charts[key].destroy();
+            } else {
+              const container = document.getElementById("disks-container");
+              const h2 = document.createElement("h2");
+              h2.textContent = key;
+              container.appendChild(h2);
+              const canvas = document.createElement("canvas");
+              canvas.id = id;
+              container.appendChild(canvas);
+            }
+            const ctx = document.getElementById(id);
+            const points = [];
+            for (let i=0; i<timestamp.length; ++i) {
+              points.push({x: timestamp[i] * 1000, y: value[i]});
+            }
+            charts[key] = new Chart(ctx, {
+              type: "line",
+              data: {datasets: [{
+                borderColor: "#ff0000",
+                borderWidth: 1,
+                data: points,
+                label: 'utilization rate',
+                radius: 0,
+              }]},
+              options
+            });
+          }
+        })
+        .catch((err) => {
+          console.log("err:", err);
+        });
+        const interval = Math.min(60, Math.max(0, parseInt(document.getElementById("interval").value))) * 1000;
+        setTimeout(getdata, interval);
+      }
+      setTimeout(getdata, 2000);
+    </script>
+    <div>
+      <h1>{{host}}</h1>
+      <div>
+        <label for="interval">refresh interval [sec]</label>
+        <input id="interval" type="number" value="5" min="0" max="60"/>
+      </div>
+      <div>
+        <label for="duration">maximum duration [sec]</label>
+        <input id="duration" type="number" value="3600" min="10"/>
+      </div>
+    </div>
+    <div>
+      <h2>memory</h2>
+      <canvas id="memory-chart"></canvas>
+    </div>
+    <div id="cpus-container">
+    </div>
+    <div id="disks-container">
+    </div>
+  </body>
+</html>

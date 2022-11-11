@@ -1,18 +1,21 @@
 [tool.poetry]
 name = "device-monitor"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Hirahara. Taiki <hirahara.taiki@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.9"
 psutil = "^5.9.3"
+Flask = "2.0.3"
+pandas = "1.0.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 
 [tool.poetry.scripts]
 device-monitor = "device_monitor.cli:main"
+device-monitor-serve = "device_monitor.server:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
