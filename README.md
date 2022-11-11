@@ -27,5 +27,5 @@ QUIT: Ctrl + C
 ```bash
 device-monitor-serve ./path/to/my/log.log --port 5050
 ```
-![image1](./image/IMG_3696.png)
-![image1](./image/IMG_3697.png)
+![image1](image/IMG_3696.png)
+![image1](image/IMG_3697.png)
