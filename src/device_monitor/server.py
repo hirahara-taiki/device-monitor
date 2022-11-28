@@ -4,7 +4,7 @@ from flask import Flask, jsonify, render_template, request
 import pandas as pd
 
 HOSTNAME = socket.gethostname()
-IP = socket.gethostbyname(HOSTNAME)
+IP = socket.gethostbyname(HOSTNAME + ".local")
 port = 5000
 path_log = ""
 
